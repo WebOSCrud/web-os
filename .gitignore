@@ -46,3 +46,4 @@ dist
 maven.properties
 *.log
 *.gpg
+.DS_Store
