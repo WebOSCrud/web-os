@@ -26,7 +26,8 @@ import java.util.Arrays;
  * 使用一个 ThreadGroup 来作为 一个 wap 的 ThreadGroup，用于监控 wap内部创建的线程
  * </p>
  * <p>
- * 用于在 停止容器是没有自动结束 wap 内部创建的线程，就可以通过 ThreadGroup 来获取创建的线程来强制结束。使jvm 能够正确的卸载 classloader
+ * 用于在 停止容器是没有自动结束 wap 内部创建的线程，就可以通过 ThreadGroup 来获取创建的线程来强制结束。使jvm 能够正确的卸载 classloader,
+ * 但是需要注意该方法强制结束线程不能确保 数据安全。
  * </p>
  *
  * @see Thread#group
@@ -104,6 +105,13 @@ public class Wap {
         wapStatus = WapStatus.Loaded;
     }
 
+    /**
+     * 启动wap 的 spring 容器
+     * @param args
+     * @param servletContext
+     * @param servletConfig
+     * @throws Exception
+     */
     public void start(String[] args, ServletContext servletContext, ServletConfig servletConfig) throws Exception {
         wapStatus = WapStatus.Starting;
         startTime = System.currentTimeMillis();
