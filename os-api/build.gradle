@@ -65,13 +65,13 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = webOsGroup
-            artifactId = "os-api"
+            artifactId = "web-os-api"
             version = webOsVersion
             from components.java
             artifact sourcesJar
             artifact javadocJar
             pom {
-                name = 'os-api'
+                name = 'web-os-api'
                 description = 'os-api'
                 url = 'https://github.com/WebOSCrud/web-os'
                 licenses {

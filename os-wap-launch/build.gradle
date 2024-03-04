@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'java-library'
+    id 'signing'
 //    id 'org.springframework.boot' version '2.7.14'
 //    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
@@ -32,5 +35,75 @@ task 'classpath.dev'{
         }
         def file = file('../os-wap-launch.wev')  // 文件路径相对于项目根目录
         file.text = content  // 使用 .text 属性将内容写入文件
+    }
+}
+// 打包sourcesJar任务
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+// 打包javadocJar任务
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+tasks.withType(Javadoc) {
+    failOnError false
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+
+publishing {
+    repositories {
+        maven {
+            File mv = new File(getProject().getRootDir().getPath() + File.separator + "maven.properties")
+            if(!mv.exists()){
+                return
+            }
+            Properties properties = new Properties()
+            properties.load(new FileInputStream(mv))
+            def userName = properties.getProperty("username")
+            def passWord = properties.getProperty("password")
+            def releasesRepoUrl = "https://oss.sonatype.org/content/repositories/releases/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            credentials {
+                username userName
+                password passWord
+            }
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = webOsGroup
+            artifactId = "web-os-wap-launch"
+            version = webOsVersion
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = 'web-os-wap-launch'
+                description = 'os-wap-launch'
+                url = 'https://github.com/WebOSCrud/web-os'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'donting'
+                        name = 'donting'
+                        email = '596643891@qq.com'
+                    }
+                }
+
+            }
+        }
     }
 }
