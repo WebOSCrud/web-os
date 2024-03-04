@@ -1,0 +1,13 @@
+rootProject.name = 'web-os2'
+//核心 负责wap管理，权限管理，http 请求分发，httpServer
+include 'os-core'
+//wap测试
+include 'os-api'
+//启动器
+include 'os-launch'
+//wap 启动器，由 os-core 独立加载。wap 本质就是一个完全的 springboot fat 的jar 包
+include 'os-wap-launch'
+
+//wap测试
+include 'os-wap-test'
+

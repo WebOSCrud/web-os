@@ -1,0 +1,10 @@
+
+# Environment Post Processors
+#org.springframework.boot.env.EnvironmentPostProcessor=
+#org.springframework.boot.autoconfigure.AutoConfigurationImportFilter=\
+#  cn.donting.plugin.springboot.starter.plugin.configuration.AutoConfigurationImportFilter
+
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  cn.donting.web.os.wap.launch.autoconfigure.Autoconfigure,\
+  cn.donting.web.os.wap.launch.autoconfigure.WapWebMvcConfigurer

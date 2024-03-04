@@ -1,0 +1,53 @@
+buildscript {
+    repositories {
+//        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+        mavenLocal()
+    }
+    dependencies {
+        classpath "cn.donting.web.os:web-os-gradle-plugin:0.0.12-SNAPSHOT"
+    }
+}
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.14'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+apply plugin:"cn.donting.web.os.gradle-plugin"
+
+
+group = webOsGroup
+version = webOsVersion
+
+java {
+    sourceCompatibility = '1.8'
+}
+wapRun{
+}
+
+repositories {
+    mavenLocal()
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public" }
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+    mavenCentral()
+}
+task 'classpath.dev'(dependsOn: compileJava) {
+    doFirst {
+        def classpath = sourceSets.main.runtimeClasspath
+        def content = "cn.donting.web.os.test.WapApplication\n"
+        classpath.forEach {
+            content += it.getPath() + "\n";
+        }
+        def file = file('../os-wap-test.wev')
+        file.text = content
+    }
+
+}
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+

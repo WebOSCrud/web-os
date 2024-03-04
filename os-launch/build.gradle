@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.0.0'
+}
+
+group = webOsGroup
+version = webOsVersion
+
+repositories {
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public" }
+    mavenCentral()
+}
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-loader:${SpringBootVersion}")
+    implementation project(":os-api")
+    compileOnly("org.springframework.boot:spring-boot-starter-web:${SpringBootVersion}")
+    implementation "javax.servlet:javax.servlet-api:4.0.1"
+    implementation "jakarta.websocket:jakarta.websocket-api:1.1.2"
+//    implementation files("D:\\test\\web-os2\\os-core\\build\\libs\\os-core-0.0.1-SNAPSHOT.jar")
+}
+jar {
+    enabled = false
+    dependsOn(shadowJar { archiveClassifier = null })
+}
+shadowJar {
+    manifest {
+        attributes 'Main-Class': 'cn.donting.web.os.launch.WebosLauncher'
+    }
+}
+test {
+    useJUnitPlatform()
+}

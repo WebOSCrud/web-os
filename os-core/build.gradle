@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.14'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+group = webOsGroup
+version = webOsVersion
+
+java {
+    sourceCompatibility = '1.8'
+}
+
+repositories {
+    maven { url "https://maven.aliyun.com/nexus/content/groups/public" }
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+//    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    compileOnly 'org.springframework.boot:spring-boot-loader'
+    compileOnly project(":os-launch")
+    compileOnly project(":os-api")
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation project(":os-api")
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+}
+
+tasks.named('compileJava') {
+    inputs.files(tasks.named('processResources'))
+}
+
+task 'classpath.dev'{
+    doFirst {
+        def classpath = sourceSets.main.runtimeClasspath
+        def content = "cn.donting.web.os.core.OsCoreApplication\n"
+        classpath.forEach {
+            content+=it.getPath()+"\n";
+        }
+        def file = file('../os-core.wev')  // 文件路径相对于项目根目录
+        file.text = content  // 使用 .text 属性将内容写入文件
+    }
+
+}

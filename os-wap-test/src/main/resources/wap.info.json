@@ -1,0 +1,22 @@
+{
+  "id": "wapTest",
+  "name": "wap test",
+  "iconResource": "static/display.svg",
+  "description": "",
+  "version": "",
+  "numberVersion": 10,
+  "fileTypes": [
+    {
+      "extName": "txt",
+      "description": "文本文件",
+      "iconResource": "static/display.svg"
+    }
+  ],
+  "wapWindows": [
+    {
+      "name": "file",
+      "type": "OpenFile",
+      "url": "/index.html"
+    }
+  ]
+}
