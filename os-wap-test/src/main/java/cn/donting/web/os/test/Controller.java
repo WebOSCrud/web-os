@@ -1,5 +1,6 @@
 package cn.donting.web.os.test;
 
+import cn.donting.web.os.api.OsApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +17,11 @@ public class Controller {
 
     @Autowired
     HttpServletRequest httpServletRequest;
+    @Autowired
+    OsApi osApi;
 
     @GetMapping("/test")
     public String test() {
-        return httpServletRequest.getSession().getId()+"update";
+        return httpServletRequest.getSession().getId() + "update";
     }
 }

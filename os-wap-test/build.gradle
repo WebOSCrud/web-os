@@ -46,6 +46,8 @@ task 'classpath.dev'(dependsOn: compileJava) {
 }
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.8'
+    compileOnly 'cn.donting.web.os:web-os-api:0.0.15-SNAPSHOT'
+
     annotationProcessor 'org.projectlombok:lombok:1.18.8'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

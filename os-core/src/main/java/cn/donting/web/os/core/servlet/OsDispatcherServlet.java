@@ -115,6 +115,12 @@ public class OsDispatcherServlet extends DispatcherServlet {
             if (request.getQueryString() != null) {
                 queryString = "?" + URLDecoder.decode(queryString, "utf-8");
             }
+            if (!checkLogin(request, response)) {
+                return;
+            }
+            if (checkIndex(request, response)) {
+                return;
+            }
             log.debug("http请求:{} {}{}", request.getMethod(), request.getRequestURI(), queryString);
             String wapId = getWapId(request);
             if (wapId == null) {
@@ -131,12 +137,7 @@ public class OsDispatcherServlet extends DispatcherServlet {
             if (request.getAttribute("request_origin_url") == null) {
                 request.setAttribute("request_origin_url", request.getRequestURI());
             }
-            if (!checkLogin(request, response)) {
-                return;
-            }
-            if (checkIndex(request, response)) {
-                return;
-            }
+
             wapIdThreadLocal.set(wapId);
             if (OsCoreApplication.OS_ID.equals(wapId)) {
                 Thread.currentThread().setContextClassLoader(OsDispatcherServlet.class.getClassLoader());
@@ -172,6 +173,9 @@ public class OsDispatcherServlet extends DispatcherServlet {
             return wapId;
         }
         wapId = getWapId(requestURL);
+        if (OsCoreApplication.OS_ID.equals(wapId)) {
+            return wapId;
+        }
         if (wapId != null && wapInfoRepository.findById(wapId).isPresent()) {
             urlWapMap.put(requestURL,wapId);
             return wapId;

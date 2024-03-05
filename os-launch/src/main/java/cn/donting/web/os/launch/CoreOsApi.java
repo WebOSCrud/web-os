@@ -18,7 +18,7 @@ public class CoreOsApi {
      * @param osApi
      */
     public static void setOsApi(OsApi osApi) {
-        if(!osApi.getClass().getClassLoader().equals(OsClassLoader.class)){
+        if(!osApi.getClass().getClassLoader().getClass().equals(OsClassLoader.class)){
             return;
         }
         if(CoreOsApi.osApi!=null){
