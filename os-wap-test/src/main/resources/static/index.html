@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+index
+<script>
+    // 定义POST请求的URL和要发送的数据
+    const url = '/wapTest/login';
+    const data = {
+        key1: 'value1',
+        key2: 'value2'
+    };
+
+    // 使用Fetch API发送POST请求
+    fetch(url, {
+        method: 'POST', // 使用POST方法
+        headers: {
+            'Content-Type': 'application/json', // 指定发送的数据类型为JSON
+        },
+        body: JSON.stringify(data) // 将JavaScript对象转换为JSON字符串作为请求体
+    })
+        .then(response => {
+            // 处理响应
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // 解析JSON格式的响应数据
+        })
+        .then(data => {
+            // 处理JSON格式的响应数据
+            console.log(data);
+        })
+        .catch(error => {
+            // 捕获异常
+            console.error('There was a problem with your fetch operation:', error);
+        });
+
+</script>
+</body>
+</html>

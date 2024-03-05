@@ -34,34 +34,22 @@ public class UserController {
         this.osApi = osApi;
         this.userService = userService;
     }
+//
+//    /**
+//     * 用户登录
+//     *
+//     * @param user name,password
+//     * @return {@link  ResponseBodyCodeEnum#LOGIN_IS_LOGIN}
+//     * {@link  ResponseBodyCodeEnum#LOGIN_FAIL}
+//     * {@link  ResponseBodyCodeEnum#OK}
+//     * @see
+//     */
+//    @PostMapping("/login")
+//    public ResponseBody<UserVo> login(@RequestBody User user) {
+//        user = osApi.userService().login(user.getName(), user.getPassword());
+//        return ResponseBody.success(new UserVo(user));
+//    }
 
-    /**
-     * 用户登录
-     *
-     * @param user name,password
-     * @return {@link  ResponseBodyCodeEnum#LOGIN_IS_LOGIN}
-     * {@link  ResponseBodyCodeEnum#LOGIN_FAIL}
-     * {@link  ResponseBodyCodeEnum#OK}
-     * @see
-     */
-    @PostMapping("/login")
-    public ResponseBody<UserVo> login(@RequestBody User user) {
-        user = osApi.userService().login(user.getName(), user.getPassword());
-        return ResponseBody.success(new UserVo(user));
-    }
-
-    /**
-     * 强制登陆
-     *
-     * @param LoginParamVo 强制登陆id,来自  /user/login
-     * @return {@link  ResponseBodyCodeEnum#LOGIN_FAIL}
-     * {@link  ResponseBodyCodeEnum#OK}
-     */
-    @PostMapping("/login/force")
-    public ResponseBody<UserVo> loginForce(@RequestBody LoginForceVo LoginParamVo) {
-        User user = osApi.userService().loginForce(LoginParamVo.getLoginId());
-        return ResponseBody.success(new UserVo(user));
-    }
 
     /**
      * 登出

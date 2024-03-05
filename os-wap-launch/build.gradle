@@ -33,7 +33,7 @@ task 'classpath.dev'{
         classpath.forEach {
             content+=it.getPath()+"\n";
         }
-        def file = file('../os-wap-launch.wev')  // 文件路径相对于项目根目录
+        def file = file('../web-os-wap-launch.wev')  // 文件路径相对于项目根目录
         file.text = content  // 使用 .text 属性将内容写入文件
     }
 }

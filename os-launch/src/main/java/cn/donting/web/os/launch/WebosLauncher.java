@@ -29,7 +29,14 @@ public interface WebosLauncher {
 
     static void main(String[] args) throws Exception {
         StartMode startMode = startMode(args);
-        System.out.printf("StartMode:"+startMode);
+        for (String arg : args) {
+            if (arg.startsWith("-user.dir=")) {
+                String userDir = arg.split("=")[1];
+                System.setProperty("user.dir",userDir);
+            }
+        }
+
+        System.out.println("StartMode:"+startMode);
         if (startMode== StartMode.Source) {
             new DevWebosLaunch().launch(args);
             return;
@@ -39,13 +46,13 @@ public interface WebosLauncher {
             File file = new File(filePath);
             File parentFile = file.getParentFile();
             for (File listFile : parentFile.listFiles()) {
-                if (listFile.getName().startsWith("os-core") && listFile.getName().endsWith(".jar")) {
-                    System.out.println("加载os-core-jar: " + listFile.getPath());
+                if (listFile.getName().startsWith("web-os-core") && listFile.getName().endsWith(".jar")) {
+                    System.out.println("加载web-os-core-jar: " + listFile.getPath());
                     new JarWebosLaunch(listFile).launch(args);
                     return;
                 }
             }
-            throw new RuntimeException("JarWebosLaunch 未找到核心jar-> os-core*.jar " + file);
+            throw new RuntimeException("JarWebosLaunch 未找到核心jar-> web-os-core*.jar " + file);
         }
 
         if(startMode==StartMode.Normal){
@@ -53,7 +60,7 @@ public interface WebosLauncher {
             for (File listFile : new File(userDir).listFiles()) {
 
             }
-            throw new RuntimeException("JarWebosLaunch 未找到核心jar-> os-core*.jar " + userDir);
+            throw new RuntimeException("JarWebosLaunch 未找到核心jar-> web-os-core*.jar " + userDir);
         }
     }
 

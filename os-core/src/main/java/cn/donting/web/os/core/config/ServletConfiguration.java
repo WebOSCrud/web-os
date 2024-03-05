@@ -1,6 +1,7 @@
 package cn.donting.web.os.core.config;
 
 import cn.donting.web.os.core.api.OsApi;
+import cn.donting.web.os.core.db.repository.IUserRepository;
 import cn.donting.web.os.core.db.repository.IWapInfoRepository;
 import cn.donting.web.os.core.properties.DevOsProperties;
 import cn.donting.web.os.core.service.OsService;
@@ -30,8 +31,9 @@ public class ServletConfiguration {
                                                IWapInfoRepository wapInfoRepository,
                                                UserService userService,
                                                OsApi osApi,
+                                               IUserRepository iUserRepository,
                                                WapRuntimeService wapRuntimeService) {
-        return new OsDispatcherServlet(devOsProperties, osService, wapInfoRepository, userService, osApi, wapRuntimeService);
+        return new OsDispatcherServlet(devOsProperties, osService, wapInfoRepository, userService, osApi, wapRuntimeService,iUserRepository);
     }
 
 }

@@ -44,7 +44,7 @@ public abstract class WapLoader {
      */
     private List<URL> getWapLaunchURL() throws IOException {
         List<URL> urls = new ArrayList<>();
-        File file = new File("./os-wap-launch.wev");
+        File file = new File("./web-os-wap-launch.wev");
         if (file.exists()) {
             List<String> paths = Files.readAllLines(file.toPath());
             for (String path : paths) {
@@ -54,12 +54,12 @@ public abstract class WapLoader {
         } else {
             String userDir = System.getProperty("user.dir");
             for (File wapLaunchFile : new File(userDir).listFiles()) {
-                if (wapLaunchFile.getName().startsWith("os-wap-launch") && wapLaunchFile.getName().endsWith(".jar")) {
+                if (wapLaunchFile.getName().startsWith("web-os-wap-launch") && wapLaunchFile.getName().endsWith(".jar")) {
                     urls.add(wapLaunchFile.toURI().toURL());
                     return urls;
                 }
             }
-            throw new RuntimeException("在未找到 "+userDir+" 未找到 os-wap-launch*.jar");
+            throw new RuntimeException("在未找到 "+userDir+" 未找到 web-os-wap-launch*.jar");
         }
     }
 

@@ -14,8 +14,8 @@
   ],
   "wapWindows": [
     {
-      "name": "file",
-      "type": "OpenFile",
+      "name": "desktop",
+      "type": "Desktop",
       "url": "/index.html"
     }
   ]

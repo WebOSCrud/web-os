@@ -20,8 +20,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.8'
-    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
 //    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
@@ -31,6 +30,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation project(":os-api")
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
 }
 
 tasks.named('compileJava') {
@@ -61,7 +63,7 @@ task 'classpath.dev'{
         classpath.forEach {
             content+=it.getPath()+"\n";
         }
-        def file = file('../os-core.wev')  // 文件路径相对于项目根目录
+        def file = file('../web-os-core.wev')  // 文件路径相对于项目根目录
         file.text = content  // 使用 .text 属性将内容写入文件
     }
 

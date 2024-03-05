@@ -14,6 +14,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import javax.websocket.Session;
@@ -45,20 +46,12 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
 
     final IUserRepository userRepository;
     final HttpServletRequest httpServletRequest;
-    /**
-     * 登陆信息
-     * 绑定到 SessionId
-     */
-    private Map<String, UserLoginInfo> userLoginSessionIdInfoMap = new ConcurrentHashMap<>();
-    /**
-     * 登陆信息
-     * 绑定到 userId(userName)
-     */
-    private Map<String, UserLoginInfo> userLoginUserIdInfoMap = new ConcurrentHashMap<>();
+    final HttpServletResponse httpServletResponse;
 
-    public UserService(IUserRepository userRepository, HttpServletRequest httpServletRequest) {
+    public UserService(IUserRepository userRepository, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         this.userRepository = userRepository;
         this.httpServletRequest = httpServletRequest;
+        this.httpServletResponse = httpServletResponse;
     }
 
     /**
@@ -69,96 +62,42 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
      */
     @Override
     public User getLoginUser() {
-        String id = httpServletRequest.getSession().getId();
-        UserLoginInfo userLoginInfo = userLoginSessionIdInfoMap.get(id);
-        if (userLoginInfo != null) {
-            return userLoginInfo.user;
-        }
-        return null;
+        User user = (User) httpServletRequest.getSession().getAttribute("user");
+        return user;
     }
 
-    /**
-     * 登陆用户
-     *
-     * @param userName 用户名
-     * @param password 密码
-     * @return null 登陆失败 {@link ResponseBodyCodeEnum#LOGIN_FAIL}
-     * @see UserService#loginForce(String)
-     */
-    public synchronized User login(String userName, String password) {
-        if (userName == null || password == null) {
-            throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_FAIL));
-        }
-        Optional<User> userOp = userRepository.findById(userName);
-        if (userOp.isPresent() && userOp.get().getPassword().equals(password)) {
-            User user = userOp.get();
-            UserLoginInfo userLoginInfo = userLoginUserIdInfoMap.get(userName);
-            if (userLoginInfo != null) {
-                //sessionId 相等,登陆过的
-                if (userLoginInfo.sessionId.equals(httpServletRequest.getSession().getId())) {
-                    return user;
-                }
-                //用户已登录 使用loginId
-                String loginId = UUID.randomUUID().toString();
-                LoginForceVo loginForceVo = new LoginForceVo();
-                loginForceVo.setLoginId(loginId);
-                httpServletRequest.getSession().setAttribute(loginId, userName);
-                throw new ResponseException(ResponseBody.failData(ResponseBodyCodeEnum.LOGIN_IS_LOGIN, loginForceVo));
-            }
-            userLoginInfo = new UserLoginInfo();
-            userLoginInfo.sessionId = httpServletRequest.getSession().getId();
-            userLoginInfo.user = user;
-            userLoginInfo.loginTime = System.currentTimeMillis();
-            userLoginUserIdInfoMap.put(userName, userLoginInfo);
-            userLoginSessionIdInfoMap.put(httpServletRequest.getSession().getId(), userLoginInfo);
-            return user;
-        }
-        throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_FAIL));
-    }
-
-    /**
-     * session 销毁，用户自动登出
-     *
-     * @param se the notification event
-     */
-
-    /**
-     * 强制登陆，其他地方的登陆会被挤下去
-     *
-     * @param loginId
-     * @see UserService#login(String, String)
-     * @see UserService#loginForce(String)
-     * @see LoginForceVo#loginId
-     */
-    public User loginForce(String loginId) {
-        String userName = (String) httpServletRequest.getSession().getAttribute(loginId);
-        //登陆成功
-        if (userName != null) {
-            httpServletRequest.getSession().removeAttribute(loginId);
-            UserLoginInfo userLoginInfo = userLoginUserIdInfoMap.get(userName);
-            //修改sessionId 换登录
-            if (userLoginInfo != null) {
-                userLoginInfo.loginTime = System.currentTimeMillis();
-                userLoginInfo.sessionId = httpServletRequest.getSession().getId();
-                userLoginSessionIdInfoMap.put(userLoginInfo.sessionId, userLoginInfo);
-                userLoginUserIdInfoMap.put(userLoginInfo.user.getId(), userLoginInfo);
-                return userLoginInfo.user;
-            }
-            throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_FAIL));
-        }
-        throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_FAIL));
-    }
+//    /**
+//     * 登陆用户
+//     *
+//     * @param userName 用户名
+//     * @param password 密码
+//     * @return null 登陆失败 {@link ResponseBodyCodeEnum#LOGIN_FAIL}
+//     */
+//    public synchronized User login(String userName, String password) {
+//        if (userName == null || password == null) {
+//            throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_FAIL));
+//        }
+//        Optional<User> userOp = userRepository.findById(userName);
+//        if (userOp.isPresent() && userOp.get().getPassword().equals(password)) {
+//            User user = userOp.get();
+//            String token=UUID.randomUUID().toString();
+//            user.setExpiredTime(System.currentTimeMillis()+User.tokenExpiredTime);
+//            user.setToken(token);
+//            userRepository.save(user);
+//            httpServletRequest.getSession().setAttribute("user.token",token);
+//            return user;
+//        }
+//        throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_FAIL));
+//    }
 
     /**
      * 登出
      */
     public synchronized void logout() {
-        String id = httpServletRequest.getSession().getId();
-        UserLoginInfo userLoginInfo = userLoginSessionIdInfoMap.remove(id);
-        if (userLoginInfo != null) {
-            log.info("logout:{}", userLoginInfo.user.getName());
-            userLoginUserIdInfoMap.remove(userLoginInfo.user.getId());
-        }
+        User loginUser = getLoginUser();
+        loginUser.setNonce(null);
+        loginUser.setNonceExpiredTime(0);
+        httpServletRequest.getSession().removeAttribute("user");
     }
 
     /**
@@ -179,12 +118,12 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
         userSpace.mkdirs();
         File desktop = new File(userSpace, OSFileSpaces.USER_DESKTOP_NAME);
         desktop.mkdirs();
-        File file = new File(OSFileSpaces.OS_USER_AVATAR,user.getName()+".png");
+        File file = new File(OSFileSpaces.OS_USER_AVATAR, user.getName() + ".png");
         try {
             user.setAvatarName(file.getName());
             URL resource = UserService.class.getClassLoader().getResource("static/img/defAccount.png");
             FileUtil.copyFile(resource, file);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             log.warn(ex.getMessage());
         }
         return userRepository.save(user);
@@ -213,11 +152,6 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
     @Override
     public synchronized void sessionDestroyed(HttpSessionEvent se) {
         log.info("sessionDestroyed:{}", se.getSession().getId());
-        UserLoginInfo userLoginInfo = userLoginSessionIdInfoMap.remove(se.getSession().getId());
-        if (userLoginInfo != null && userLoginInfo.sessionId.equals(se.getSession().getId())) {
-            log.info("超时自动登出:{}", userLoginInfo.user.getName());
-            userLoginUserIdInfoMap.remove(userLoginInfo.user.getId());
-        }
     }
 
     @Override
@@ -225,28 +159,6 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
         log.info("sessionCreated:{}", se.getSession().getId());
     }
 
-    /**
-     * 检查用户登陆情况
-     *
-     * @throws ResponseException
-     */
-    public void checkLogin() {
-        String sessionId = httpServletRequest.getSession().getId();
-        UserLoginInfo userLoginInfo = userLoginSessionIdInfoMap.get(sessionId);
-        //未登陆
-        if (userLoginInfo == null) {
-            throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_NONE));
-        }
-        //
-        if (userLoginInfo.sessionId.equals(sessionId)) {
-            return;
-        } else {
-            //在其他地方登陆了
-            userLoginSessionIdInfoMap.remove(sessionId);
-            throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_ELSEWHERE));
-        }
-
-    }
 
     /**
      * 用户列表
@@ -261,6 +173,8 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
         List<User> all = userRepository.findAll();
         for (User user : all) {
             user.setPassword(null);
+            user.setNonceExpiredTime(0);
+            user.setNonce(null);
         }
         return all;
     }
@@ -322,11 +236,6 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
             if (user.getAvatarName() != null) {
                 new File(OSFileSpaces.OS_USER_AVATAR, user.getAvatarName()).delete();
             }
-            //移除怎在登陆使用的用户 登陆信息
-            UserLoginInfo userLoginInfo = userLoginUserIdInfoMap.remove(userName);
-            if (userLoginInfo != null) {
-                userLoginSessionIdInfoMap.remove(userLoginInfo.sessionId);
-            }
             //删除用户数据
             userRepository.deleteById(userName);
             File userSpace = new File(OSFileSpaces.users, user.getName());
@@ -338,26 +247,5 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
         } else {
             throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.NOT_FOUND, "用户不存在"));
         }
-    }
-
-    /**
-     * 用户登陆信息
-     */
-    private static class UserLoginInfo {
-        /**
-         * 登陆的用户
-         */
-        private User user;
-        /**
-         * 登录时间
-         */
-        private long loginTime;
-        /**
-         * sessionId
-         *
-         * @see Session#getId()
-         */
-        private String sessionId;
-
     }
 }

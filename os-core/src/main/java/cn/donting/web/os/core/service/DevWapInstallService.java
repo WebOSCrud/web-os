@@ -44,11 +44,12 @@ public class DevWapInstallService implements ApplicationRunner, FileWatch {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         String dir = System.getProperty("user.dir");
+        log.info("wev dir:{}",dir);
         File[] files = new File(dir).listFiles();
         for (File file : files) {
             String extName = FileUtil.extName(file);
-            if (extName.equals(OsCoreApplication.WPA_DEV_EXT_NAME) && !file.getName().equals("os-core.wev") &&
-                    !file.getName().equals("os-wap-launch.wev")
+            if (extName.equals(OsCoreApplication.WPA_DEV_EXT_NAME) && !file.getName().equals("web-os-core.wev") &&
+                    !file.getName().equals("web-os-wap-launch.wev")
             ) {
                 log.info("load dev wap:{}",file.getName());
                 WapInfo wapInfo = wapManager.installUpdate(file);

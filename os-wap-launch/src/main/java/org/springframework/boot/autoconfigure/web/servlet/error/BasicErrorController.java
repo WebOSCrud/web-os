@@ -7,10 +7,7 @@ import org.springframework.boot.autoconfigure.web.ErrorProperties;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.server.AbstractServletWebServerFactory;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -53,6 +50,7 @@ public class BasicErrorController extends AbstractErrorController {
 
     @Value("${--cn.donting.web.os.dev.pageNotFoundForwardHost:}")
     public String host;
+
     @Value("${--cn.donting.web.os.dev.pageNotFoundForwardWapId:true}")
     public boolean forwardWapId;
 
@@ -66,6 +64,7 @@ public class BasicErrorController extends AbstractErrorController {
      */
     public BasicErrorController(ErrorAttributes errorAttributes, ErrorProperties errorProperties) {
         this(errorAttributes, errorProperties, Collections.emptyList());
+        log.info("wap dev BasicErrorController");
     }
 
     /**
@@ -80,6 +79,7 @@ public class BasicErrorController extends AbstractErrorController {
         super(errorAttributes, errorViewResolvers);
         Assert.notNull(errorProperties, "ErrorProperties must not be null");
         this.errorProperties = errorProperties;
+        log.info("wap dev BasicErrorController");
     }
 
     @RequestMapping(produces = MediaType.TEXT_HTML_VALUE)
@@ -98,8 +98,13 @@ public class BasicErrorController extends AbstractErrorController {
     }
 
     @RequestMapping
-    public ResponseEntity<Map<String, Object>> error(HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> error(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpStatus status = getStatus(request);
+        if (status.equals(HttpStatus.NOT_FOUND)) {
+            if (forward(request, response)) {
+                return null;
+            }
+        }
         if (status == HttpStatus.NO_CONTENT) {
             return new ResponseEntity<>(status);
         }
@@ -108,8 +113,13 @@ public class BasicErrorController extends AbstractErrorController {
     }
 
     @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
-    public ResponseEntity<String> mediaTypeNotAcceptable(HttpServletRequest request) {
+    public ResponseEntity<String> mediaTypeNotAcceptable(HttpServletRequest request,HttpServletResponse response) throws IOException {
         HttpStatus status = getStatus(request);
+        if (status.equals(HttpStatus.NOT_FOUND)) {
+            if (forward(request, response)) {
+                return null;
+            }
+        }
         return ResponseEntity.status(status).build();
     }
 
@@ -198,7 +208,6 @@ public class BasicErrorController extends AbstractErrorController {
             if (host.length() == 0) {
                 return false;
             }
-            Object request_origin_url = request.getAttribute("request_origin_url");
             String originUrl = request.getAttribute("request_origin_url").toString();
             if(!forwardWapId){
                 String[] split = originUrl.split("/");
@@ -213,7 +222,7 @@ public class BasicErrorController extends AbstractErrorController {
             // 执行代理查询
             String methodName = request.getMethod();
             HttpMethod httpMethod = HttpMethod.resolve(methodName);
-            log.info("执行dev代理：{} {}:", methodName, host + originUrl);
+            log.info("执行dev代理：{} {}", methodName, host + originUrl);
 
             if (httpMethod == null) {
                 return false;
@@ -235,6 +244,7 @@ public class BasicErrorController extends AbstractErrorController {
             // 执行远程调用
             ClientHttpResponse clientHttpResponse = delegate.execute();
             response.setStatus(clientHttpResponse.getStatusCode().value());
+            HttpHeaders headers = clientHttpResponse.getHeaders();
             // 设置响应头
             clientHttpResponse.getHeaders().forEach((key, value) -> value.forEach(it -> {
                 response.setHeader(key, it);

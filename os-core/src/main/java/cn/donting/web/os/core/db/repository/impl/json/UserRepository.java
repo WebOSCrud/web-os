@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 public class UserRepository extends JsonOsDataBaseTable<User,String> implements IUserRepository {
@@ -26,5 +27,15 @@ public class UserRepository extends JsonOsDataBaseTable<User,String> implements 
     protected TypeReference<List<User>> getTypeReferenceList() {
         return new TypeReference<List<User>>() {
         };
+    }
+
+    @Override
+    public Optional<User> findByToken(String nonce) {
+        for (User user : findAll()) {
+            if (nonce.equals(user.getNonce())) {
+                return Optional.of(user);
+            }
+        }
+        return Optional.empty();
     }
 }

@@ -19,7 +19,7 @@ public class DevWebosLaunch implements WebosLauncher{
     @Override
     public void launch(String[] args) throws Exception {
         String dir = System.getProperty("user.dir");
-        File file = new File(dir, "os-core.wev");
+        File file = new File(dir, "web-os-core.wev");
         if(!file.exists()){
             throw new IOException(file.getName()+" not found!");
         }
