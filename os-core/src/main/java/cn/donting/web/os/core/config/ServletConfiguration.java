@@ -9,6 +9,7 @@ import cn.donting.web.os.core.service.UserService;
 import cn.donting.web.os.core.service.WapRuntimeService;
 import cn.donting.web.os.core.servlet.OsDispatcherServlet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -32,8 +33,10 @@ public class ServletConfiguration {
                                                UserService userService,
                                                OsApi osApi,
                                                IUserRepository iUserRepository,
-                                               WapRuntimeService wapRuntimeService) {
-        return new OsDispatcherServlet(devOsProperties, osService, wapInfoRepository, userService, osApi, wapRuntimeService,iUserRepository);
+                                               WapRuntimeService wapRuntimeService,
+                                               @Value("${devWapId}") String wapId
+    ) {
+        return new OsDispatcherServlet(devOsProperties, osService, wapInfoRepository, userService, osApi, wapRuntimeService,iUserRepository,wapId);
     }
 
 }

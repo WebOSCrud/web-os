@@ -82,10 +82,9 @@ public class OsDispatcherServlet extends DispatcherServlet {
     private final DevOsProperties devOsProperties;
     private final IUserRepository userRepository;
 
-    private final Map<String,String> urlWapMap=new ConcurrentHashMap<>();
+    private final String devWapId;
 
-
-    public OsDispatcherServlet(DevOsProperties devOsProperties, OsService osService, IWapInfoRepository wapInfoRepository, UserService userService, OsApi osApi, WapRuntimeService wapRuntimeService, IUserRepository userRepository) {
+    public OsDispatcherServlet(DevOsProperties devOsProperties, OsService osService, IWapInfoRepository wapInfoRepository, UserService userService, OsApi osApi, WapRuntimeService wapRuntimeService, IUserRepository userRepository, String devWapId) {
         this.osApi = osApi;
         this.userService = userService;
         this.osService = osService;
@@ -93,6 +92,7 @@ public class OsDispatcherServlet extends DispatcherServlet {
         this.wapRuntimeService = wapRuntimeService;
         this.wapInfoRepository = wapInfoRepository;
         this.userRepository = userRepository;
+        this.devWapId = devWapId;
         objectMapper = new ObjectMapper();
     }
 
@@ -168,44 +168,19 @@ public class OsDispatcherServlet extends DispatcherServlet {
     private String getWapId(ServletRequest request) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String requestURL = httpServletRequest.getRequestURI();
-        String wapId = urlWapMap.get(requestURL);
-        if (wapId!=null) {
-            return wapId;
-        }
-        wapId = getWapId(requestURL);
+
+        String wapId = getWapId(requestURL);
         if (OsCoreApplication.OS_ID.equals(wapId)) {
             return wapId;
         }
         if (wapId != null && wapInfoRepository.findById(wapId).isPresent()) {
-            urlWapMap.put(requestURL,wapId);
             return wapId;
         }
-        String referer = httpServletRequest.getHeader("Referer");
-        if(referer==null){
-            return null;
-        }
-        String refererUrl = getRefererPath(referer);
-        wapId = urlWapMap.get(refererUrl);
-        if (wapId!=null) {
-            urlWapMap.put(requestURL,wapId);
-            return wapId;
+        if (devWapId != null) {
+            return devWapId;
         }
         return null;
     }
-
-    public static String getRefererPath(String url) {
-        if (url.contains("?")) {
-            url=url.split("\\?")[0];
-        }
-        String regex = "https?://[^/]+(.*)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(url);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
 
     private String getWapId(String url) {
         String[] split = url.split("/");

@@ -26,13 +26,13 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,10 +45,13 @@ public class FIleController {
     final IWapInfoRepository wapInfoRepository;
     final OsService osService;
 
+    private Set<String> imgExtName;
+
     public FIleController(IOsFileTypeRepository osFileTypeRepository, IWapInfoRepository wapInfoRepository, OsService osService) {
         this.osFileTypeRepository = osFileTypeRepository;
         this.wapInfoRepository = wapInfoRepository;
         this.osService = osService;
+        imgExtName = Arrays.asList("png", "jpg", "jpeg", "svg").stream().collect(Collectors.toSet());
     }
 
     /**
@@ -63,9 +66,22 @@ public class FIleController {
             return ResponseEntity.notFound().build();
         }
         //文件扩展名
-        String extName = FileUtil.extName(file);
+        String extName = FileUtil.extName(file).toLowerCase();
         File wapFile;
         String iconResource = null;
+        if (imgExtName.contains(extName)) {
+            httpServletResponse.setContentType(MediaType.IMAGE_JPEG_VALUE);
+            try (InputStream in = new FileInputStream(file);
+                 OutputStream out = httpServletResponse.getOutputStream()) {
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytesRead);
+                }
+            }
+            return null;
+        }
+
         if (extName.equals(OsCoreApplication.WPA_EXT_NAME) || extName.equals(OsCoreApplication.WPA_DEV_EXT_NAME)) {
             wapFile = file;
         } else {
@@ -196,7 +212,12 @@ public class FIleController {
                 }
             }
             if (!normal) {
-                fileOpenWapInfoListVo.getOthers().add(new WapBaseInfoVo(wapInfo));
+                for (WapWindow wapWindow : wapInfo.getWapWindows()) {
+                    if (wapWindow.getType().equals(WapWindowType.OpenFile)) {
+                        fileOpenWapInfoListVo.getOthers().add(new WapBaseInfoVo(wapInfo));
+                        break;
+                    }
+                }
             }
         }
         return ResponseBody.success(fileOpenWapInfoListVo);

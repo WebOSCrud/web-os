@@ -112,6 +112,8 @@ public class WapRuntimeService {
                     args.add("--"+DevOsProperties.PREFIX+".pageNotFoundForwardHost="+devOsProperties.getPageNotFoundForwardHost());
                     args.add("--"+DevOsProperties.PREFIX+".pageNotFoundForwardWapId="+devOsProperties.isPageNotFoundForwardWapId());
                 }
+                args.add("spring.output.ansi.enabled=always");
+
             }
             //主程序进入 哪个active .加载的wap 也进入对应的 active
             if(StringUtils.hasText(active)){
