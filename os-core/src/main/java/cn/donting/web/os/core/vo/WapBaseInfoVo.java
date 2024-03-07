@@ -1,7 +1,6 @@
 package cn.donting.web.os.core.vo;
 
-import cn.donting.web.os.core.db.entity.WapInfo;
-import cn.donting.web.os.core.file.OSFileSpaces;
+import cn.donting.web.os.api.wap.WapInstallInfo;
 import cn.donting.web.os.core.util.ResourceUtil;
 import lombok.Data;
 
@@ -11,9 +10,9 @@ public class WapBaseInfoVo {
     private String iconUrl;
     private String wapId;
 
-    public WapBaseInfoVo(WapInfo wapInfo) {
-        name=wapInfo.getName();
-        wapId=wapInfo.getId();
-        iconUrl= ResourceUtil.getWapResourceHttpURL(wapId,wapInfo.getIconResource());
+    public WapBaseInfoVo(WapInstallInfo wapInfo) {
+        name=wapInfo.getWapInfo().getName();
+        wapId=wapInfo.getWapInfo().getId();
+        iconUrl= ResourceUtil.getWapResourceHttpURL(wapId,wapInfo.getWapInfo().getIconResource());
     }
 }

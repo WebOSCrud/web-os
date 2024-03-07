@@ -1,7 +1,5 @@
 package cn.donting.web.os.core;
 
-import cn.donting.web.os.core.db.entity.FileType;
-import cn.donting.web.os.core.db.repository.IOsFileTypeRepository;
 import cn.donting.web.os.core.file.OSFileSpaces;
 import cn.donting.web.os.core.security.OsSecurityManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,10 +22,13 @@ public class OsCoreApplication implements InitializingBean {
     public static final String WPA_EXT_NAME = "wap";
     public static final String WPA_DEV_EXT_NAME = "wev";
     public static final String OS_VERSION = "0.0.1";
-    final IOsFileTypeRepository fileTypeRepository;
+    //TODO
+//    final IOsFileTypeRepository fileTypeRepository;
 
-    public OsCoreApplication(IOsFileTypeRepository fileTypeRepository) {
-        this.fileTypeRepository = fileTypeRepository;
+//    public OsCoreApplication(IOsFileTypeRepository fileTypeRepository) {
+//        this.fileTypeRepository = fileTypeRepository;
+//    }
+    public OsCoreApplication() {
     }
 
     @Override
@@ -62,12 +63,13 @@ public class OsCoreApplication implements InitializingBean {
 
     private void update() throws IOException {
         log.info("update os");
-        Optional<FileType> fileTypeOp = fileTypeRepository.findById(WPA_EXT_NAME);
-        if (fileTypeOp.isPresent()) {
-            if (fileTypeOp.get().getWapId().equals(OS_ID)) {
-                updateOSInfo();
-            }
-        }
+        //TODO
+//        Optional<FileType> fileTypeOp = fileTypeRepository.findById(WPA_EXT_NAME);
+//        if (fileTypeOp.isPresent()) {
+//            if (fileTypeOp.get().getWapId().equals(OS_ID)) {
+//                updateOSInfo();
+//            }
+//        }
     }
 
 

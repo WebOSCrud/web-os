@@ -1,6 +1,5 @@
 package cn.donting.web.os.core.servlet;
 
-import cn.donting.web.os.core.db.entity.WapInfo;
 import cn.donting.web.os.core.wap.Wap;
 
 import javax.servlet.ServletConfig;

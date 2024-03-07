@@ -1,14 +1,15 @@
 package cn.donting.web.os.core.servlet;
 
+import cn.donting.web.os.api.wap.WapInfo;
+import cn.donting.web.os.api.wap.WapInstallInfo;
 import cn.donting.web.os.api.wap.WapWindow;
 import cn.donting.web.os.api.wap.WapWindowType;
 import cn.donting.web.os.core.OsCoreApplication;
 import cn.donting.web.os.core.OsSetting;
 import cn.donting.web.os.core.api.OsApi;
-import cn.donting.web.os.core.db.entity.User;
-import cn.donting.web.os.core.db.entity.WapInfo;
-import cn.donting.web.os.core.db.repository.IUserRepository;
-import cn.donting.web.os.core.db.repository.IWapInfoRepository;
+import cn.donting.web.os.core.db.entity.OsUser;
+import cn.donting.web.os.core.db.repository.IOsUserRepository;
+import cn.donting.web.os.core.db.repository.IWapInstallInfoRepository;
 import cn.donting.web.os.core.domain.DigestAuthInfo;
 import cn.donting.web.os.core.exception.ResponseException;
 import cn.donting.web.os.core.exception.WapLoadException;
@@ -26,8 +27,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.descriptor.web.ErrorPage;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -41,11 +40,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 重写service。根据wapId,走wap 自己容器的 DispatcherServlet。
@@ -75,16 +70,16 @@ public class OsDispatcherServlet extends DispatcherServlet {
     private static final Set<String> loginIgnoreUrl = new HashSet<>(Arrays.asList("/os/user/login", "/os/user/login/force"));
     private final OsApi osApi;
     private final WapRuntimeService wapRuntimeService;
-    private final IWapInfoRepository wapInfoRepository;
+    private final IWapInstallInfoRepository wapInfoRepository;
     private final UserService userService;
     private final OsService osService;
     private final ObjectMapper objectMapper;
     private final DevOsProperties devOsProperties;
-    private final IUserRepository userRepository;
+    private final IOsUserRepository userRepository;
 
     private final String devWapId;
 
-    public OsDispatcherServlet(DevOsProperties devOsProperties, OsService osService, IWapInfoRepository wapInfoRepository, UserService userService, OsApi osApi, WapRuntimeService wapRuntimeService, IUserRepository userRepository, String devWapId) {
+    public OsDispatcherServlet(DevOsProperties devOsProperties, OsService osService, IWapInstallInfoRepository wapInfoRepository, UserService userService, OsApi osApi, WapRuntimeService wapRuntimeService, IOsUserRepository userRepository, String devWapId) {
         this.osApi = osApi;
         this.userService = userService;
         this.osService = osService;
@@ -202,7 +197,7 @@ public class OsDispatcherServlet extends DispatcherServlet {
         if (loginIgnoreUrl.contains(requestURI)) {
             return true;
         }
-        User loginUser = userService.getLoginUser();
+        OsUser loginUser = userService.getLoginUser();
         if (loginUser != null) {
             return true;
         }
@@ -210,12 +205,12 @@ public class OsDispatcherServlet extends DispatcherServlet {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Digest")) {
             DigestAuthInfo authInfo = getAuthInfoObject(authHeader);
-            Optional<User> userOp = userRepository.findById(authInfo.getUsername());
+            Optional<OsUser> userOp = userRepository.findById(authInfo.getUsername());
             if (!userOp.isPresent()) {
                 sendWWAuthenticate(request, httpServletResponse);
                 return false;
             }
-            User user = userOp.get();
+            OsUser user = userOp.get();
             String nonce = (String) request.getSession().getAttribute("nonce");
             if (nonce != null) {
                 /*
@@ -234,7 +229,7 @@ public class OsDispatcherServlet extends DispatcherServlet {
                 }
                 //login
                 user.setNonce(nonce);
-                user.setNonceExpiredTime(System.currentTimeMillis() + User.NONCE_EXPIRED_TIME);
+                user.setNonceExpiredTime(System.currentTimeMillis() + OsUser.NONCE_EXPIRED_TIME);
                 request.getSession().removeAttribute("nonce");
                 userRepository.save(user);
                 return true;
@@ -337,10 +332,11 @@ public class OsDispatcherServlet extends DispatcherServlet {
             if (desktopWapId == null) {
                 throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.WAP_DESKTOP_UNINSTALLED));
             }
-            WapInfo wapInfo = wapInfoRepository.findById(desktopWapId).get();
+            WapInstallInfo wapInstallInfo = wapInfoRepository.findById(desktopWapId).get();
+            WapInfo wapInfo = wapInstallInfo.getWapInfo();
             for (WapWindow wapWindow : wapInfo.getWapWindows()) {
                 if (wapWindow.getType().equals(WapWindowType.Desktop)) {
-                    String url = UrlUtil.urlToWapUrl(wapInfo.getId(), wapWindow.getUrl());
+                    String url = UrlUtil.urlToWapUrl(wapInfo.getId(), wapWindow.getOption().getUrl());
                     httpServletResponse.sendRedirect(url);
                     return true;
 //                    throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_NONE));

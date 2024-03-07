@@ -18,7 +18,8 @@ public class WapWindowVo extends WapWindow {
     private String iconUrl;
     public WapWindowVo(String wapId,WapWindow wapWindow) {
         BeanUtils.copyProperties(wapWindow,this);
-        this.iconUrl= ResourceUtil.getWapResourceHttpURL(wapId,wapWindow.getIconResource());
-        setUrl(UrlUtil.urlToWapUrl(wapId,wapWindow.getUrl()));
+        //TODO
+//        this.iconUrl= wapWindow.getIconUrl();
+//        setUrl(UrlUtil.urlToWapUrl(wapId,wapWindow.getUrl()));
     }
 }

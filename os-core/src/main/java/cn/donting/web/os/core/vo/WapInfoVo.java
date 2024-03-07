@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @see cn.donting.web.os.core.db.entity.WapInfo
+ * @see WapInstallInfo
  */
 @Data
 public class WapInfoVo {
@@ -43,16 +43,17 @@ public class WapInfoVo {
         this.description = wapInfo.getDescription();
         this.version = wapInfo.getVersion();
         this.numberVersion = wapInfo.getNumberVersion();
-        if(wapInfo instanceof cn.donting.web.os.core.db.entity.WapInfo){
-            this.installTime = ((cn.donting.web.os.core.db.entity.WapInfo) wapInfo).getInstallTime();
-            this.updateTime =  ((cn.donting.web.os.core.db.entity.WapInfo) wapInfo).getUpdateTime();
-        }
+        //TODO:
+//        if(wapInfo instanceof WapInstallInfo){
+//            this.installTime = ((WapInstallInfo) wapInfo).getInstallTime();
+//            this.updateTime =  ((WapInstallInfo) wapInfo).getUpdateTime();
+//        }
 
         iconUrl = ResourceUtil.getWapResourceHttpURL(id, wapInfo.getIconResource());
         for (WapWindow wapWindow : wapInfo.getWapWindows()) {
             wapWindows.add(new WapWindowVo(id,wapWindow));
         }
-        for (cn.donting.web.os.api.wap.WapInfo.FileType fileType : wapInfo.getFileTypes()) {
+        for (cn.donting.web.os.api.wap.FileType fileType : wapInfo.getFileTypes()) {
             fileTypes.add(new FileTypeVo(id,fileType));
         }
     }

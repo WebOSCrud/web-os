@@ -1,6 +1,7 @@
 package cn.donting.web.os.core.service;
 
 import cn.donting.web.os.api.wap.WapInfo;
+import cn.donting.web.os.api.wap.WapInstallInfo;
 import cn.donting.web.os.core.OsCoreApplication;
 import cn.donting.web.os.core.file.FileWatch;
 import cn.donting.web.os.core.file.FileWatchService;
@@ -52,8 +53,8 @@ public class DevWapInstallService implements ApplicationRunner, FileWatch {
                     !file.getName().equals("web-os-wap-launch.wev")
             ) {
                 log.info("load dev wap:{}",file.getName());
-                WapInfo wapInfo = wapManager.installUpdate(file);
-                devFileWapIdMap.put(file.toPath(),wapInfo.getId());
+                WapInstallInfo wapInstallInfo = wapManager.installUpdate(file);
+                devFileWapIdMap.put(file.toPath(),wapInstallInfo.getWapInfo().getId());
                 FileWatchService.FileWatchThread fileWatchThread = FileWatchService.addWatchFile(file, this::watch, StandardWatchEventKinds.ENTRY_MODIFY);
                 fileWatchThread.start();
             }

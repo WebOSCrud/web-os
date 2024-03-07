@@ -1,12 +1,11 @@
 package cn.donting.web.os.core.db.repository.impl.json;
 
-import cn.donting.web.os.core.db.DataId;
 import cn.donting.web.os.core.db.OsDataBaseTable;
+import cn.donting.web.os.core.file.OSFileSpaces;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,20 +18,19 @@ import java.util.concurrent.ConcurrentHashMap;
  * 数据不多，json 保存在内存里不考虑性能
  *
  * @param <T>
- * @param <ID>
  */
 @Slf4j
-public abstract class JsonOsDataBaseTable<T extends DataId<ID>, ID> implements OsDataBaseTable<T, ID> {
+public abstract class JsonOsDataBaseTable<T> implements OsDataBaseTable<T> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private Map<ID, T> dataBase;
+    private Map<String, T> dataBase;
     private File dbFile;
 
-    public JsonOsDataBaseTable(File dbFile) {
-        this.dbFile = dbFile;
+    public JsonOsDataBaseTable(String fileName) {
+        this.dbFile = new File(OSFileSpaces.OS_DB,fileName+".json");
         dataBase = new ConcurrentHashMap<>();
         if (dbFile.exists()) {
             try {
-                Map<ID, T> data = objectMapper.readValue(dbFile, getTypeReference());
+                Map<String, T> data = objectMapper.readValue(dbFile, getTypeReference());
                 dataBase.putAll(data);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -48,7 +46,7 @@ public abstract class JsonOsDataBaseTable<T extends DataId<ID>, ID> implements O
     }
 
 
-    protected abstract TypeReference<Map<ID, T>> getTypeReference();
+    protected abstract TypeReference<Map<String, T>> getTypeReference();
 
     protected abstract TypeReference<List<T>> getTypeReferenceList();
 
@@ -56,18 +54,18 @@ public abstract class JsonOsDataBaseTable<T extends DataId<ID>, ID> implements O
     public synchronized T save(T entity) {
         try {
             String s = objectMapper.writeValueAsString(entity);
-            T value = (T) objectMapper.readValue(s, entity.getClass());
-            ID id = value.getId();
-            dataBase.put(id, value);
+            T copy = (T) objectMapper.readValue(s, entity.getClass());
+            String id = getId(copy);
+            dataBase.put(id, copy);
             saveDataToFile();
-            return findById(id).get();
+            return entity;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
     @Override
-    public Optional<T> findById(ID id) {
+    public Optional<T> findById(String id) {
         T value = dataBase.get(id);
         if (value != null) {
             try {
@@ -81,7 +79,7 @@ public abstract class JsonOsDataBaseTable<T extends DataId<ID>, ID> implements O
     }
 
     @Override
-    public T deleteById(ID id) {
+    public T deleteById(String id) {
         T remove = dataBase.remove(id);
         saveDataToFile();
         return remove;
@@ -108,14 +106,30 @@ public abstract class JsonOsDataBaseTable<T extends DataId<ID>, ID> implements O
     }
 
     @Override
-    public int deleteAll(List<ID> ids) {
+    public int deleteAll(List<String> ids) {
         int count = 0;
-        for (ID id : ids) {
+        for (String id : ids) {
             if (dataBase.remove(id) != null) {
                 count++;
             }
         }
         saveDataToFile();
         return count;
+    }
+
+    @Override
+    public int saveAll(List<T> t) {
+        try {
+            for (T entity : t) {
+                String s = objectMapper.writeValueAsString(entity);
+                T copy = (T) objectMapper.readValue(s, entity.getClass());
+                String id = getId(copy);
+                dataBase.put(id, copy);
+            }
+            saveDataToFile();
+        }catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+        return t.size();
     }
 }

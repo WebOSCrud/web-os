@@ -1,13 +1,10 @@
 package cn.donting.web.os.core.util;
 
+import cn.donting.web.os.api.wap.FileType;
 import cn.donting.web.os.api.wap.WapInfo;
-import cn.donting.web.os.core.OsCoreApplication;
-import cn.donting.web.os.core.db.entity.FileType;
-import cn.donting.web.os.core.file.OSFileSpaces;
 import org.springframework.http.MediaType;
 
 import java.io.*;
-import java.lang.management.MemoryType;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.*;
@@ -104,6 +101,9 @@ public class FileUtil {
         }
         String fileName = file.getName();
         return splitNameAndExt(fileName);
+    }
+    public static String extName(String fileName) {
+        return splitNameAndExt(fileName)[1];
     }
 
     public static String[] splitNameAndExt(String fileName) {

@@ -1,22 +1,33 @@
 {
-  "id": "wapTest",
-  "name": "wap test",
-  "iconResource": "static/display.svg",
+  "id": "desktop.test",
+  "name": "桌面",
+  "iconResource": "static/img/explorer.png",
   "description": "",
-  "version": "",
-  "numberVersion": 10,
+  "version": "0.0.1",
+  "numberVersion": 1,
   "fileTypes": [
     {
-      "extName": "txt",
-      "description": "文本文件",
-      "iconResource": "static/display.svg"
+      "iconResource": "static/img/folder.png",
+      "description": "文件夹",
+      "extName": "__directory"
     }
   ],
   "wapWindows": [
     {
       "name": "desktop",
       "type": "Desktop",
-      "url": "/index.html"
+      "option": {
+        "url": "/page/desktop/index.html"
+      }
+    },
+    {
+      "name": "文件管理器",
+      "type": "Normal",
+      "iconResource": "static/img/explorer.png",
+      "option": {
+        "url": "/page/filemanager/index.html",
+        "iconUrl": "/img/explorer.png"
+      }
     }
   ]
 }

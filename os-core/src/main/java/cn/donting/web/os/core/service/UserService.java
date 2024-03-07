@@ -1,11 +1,10 @@
 package cn.donting.web.os.core.service;
 
-import cn.donting.web.os.core.db.entity.User;
-import cn.donting.web.os.core.db.repository.IUserRepository;
+import cn.donting.web.os.core.db.entity.OsUser;
+import cn.donting.web.os.core.db.repository.IOsUserRepository;
 import cn.donting.web.os.core.exception.ResponseException;
 import cn.donting.web.os.core.file.OSFileSpaces;
 import cn.donting.web.os.core.util.FileUtil;
-import cn.donting.web.os.core.vo.LoginForceVo;
 import cn.donting.web.os.core.vo.ResponseBody;
 import cn.donting.web.os.core.vo.ResponseBodyCodeEnum;
 import cn.donting.web.os.core.vo.param.UserInfoPar;
@@ -17,16 +16,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import javax.websocket.Session;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * user 管理器
@@ -44,11 +39,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class UserService implements cn.donting.web.os.api.user.UserService, HttpSessionListener, InitializingBean {
 
-    final IUserRepository userRepository;
+    final IOsUserRepository userRepository;
     final HttpServletRequest httpServletRequest;
     final HttpServletResponse httpServletResponse;
 
-    public UserService(IUserRepository userRepository, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    public UserService(IOsUserRepository userRepository, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         this.userRepository = userRepository;
         this.httpServletRequest = httpServletRequest;
         this.httpServletResponse = httpServletResponse;
@@ -61,8 +56,8 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
      * @see cn.donting.web.os.api.user.User
      */
     @Override
-    public User getLoginUser() {
-        User user = (User) httpServletRequest.getSession().getAttribute("user");
+    public OsUser getLoginUser() {
+        OsUser user = (OsUser) httpServletRequest.getSession().getAttribute("user");
         return user;
     }
 
@@ -94,7 +89,7 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
      * 登出
      */
     public synchronized void logout() {
-        User loginUser = getLoginUser();
+        OsUser loginUser = getLoginUser();
         loginUser.setNonce(null);
         loginUser.setNonceExpiredTime(0);
         httpServletRequest.getSession().removeAttribute("user");
@@ -106,11 +101,11 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
      * @param user
      * @return
      */
-    public synchronized User creatUser(User user) {
-        String name = user.getId();
+    public synchronized OsUser creatUser(OsUser user) {
+        String name = user.getName();
         log.info("creatUser:{}", user.getName());
         if (userRepository.findById(name).isPresent()) {
-            throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_CREAT_USE, user.getId() + "已经创建"));
+            throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.LOGIN_CREAT_USE, user.getName() + "已经创建"));
         }
         user.setCreatTime(System.currentTimeMillis());
         File users = OSFileSpaces.users;
@@ -137,12 +132,12 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        Optional<User> userOp = userRepository.findById("root");
+        Optional<OsUser> userOp = userRepository.findById("root");
         if (userOp.isPresent()) {
             return;
         }
         //创建root 用户
-        User user = new User();
+        OsUser user = new OsUser();
         user.setName("root");
         user.setPassword("root");
         user.setDescription("Administrator");
@@ -165,13 +160,13 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
      *
      * @return
      */
-    public List<User> userList() {
-        User loginUser = getLoginUser();
+    public List<OsUser> userList() {
+        OsUser loginUser = getLoginUser();
         if (!loginUser.getName().equals("root")) {
             throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.UNAUTHORIZED));
         }
-        List<User> all = userRepository.findAll();
-        for (User user : all) {
+        List<OsUser> all = userRepository.findAll();
+        for (OsUser user : all) {
             user.setPassword(null);
             user.setNonceExpiredTime(0);
             user.setNonce(null);
@@ -185,9 +180,9 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
      * @param userInfoPar
      * @return
      */
-    public synchronized User modifyUserInfo(UserInfoPar userInfoPar) throws IOException {
-        User loginUser = getLoginUser();
-        User user = userRepository.findById(loginUser.getId()).get();
+    public synchronized OsUser modifyUserInfo(UserInfoPar userInfoPar) throws IOException {
+        OsUser loginUser = getLoginUser();
+        OsUser user = userRepository.findById(loginUser.getName()).get();
         if (userInfoPar.getPassword() != null) {
             if (userInfoPar.getOldPassword().equals(user.getPassword())) {
                 throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.USER_OLD_PASSWORD_ERROR));
@@ -226,13 +221,13 @@ public class UserService implements cn.donting.web.os.api.user.UserService, Http
         if (userName.equals("root")) {
             throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.NOT_FOUND, "用户不存在"));
         }
-        User loginUser = getLoginUser();
+        OsUser loginUser = getLoginUser();
         if (!loginUser.getName().equals("root")) {
             throw new ResponseException(ResponseBody.fail(ResponseBodyCodeEnum.UNAUTHORIZED));
         }
-        Optional<User> userOptional = userRepository.findById(userName);
+        Optional<OsUser> userOptional = userRepository.findById(userName);
         if (userOptional.isPresent()) {
-            User user = userOptional.get();
+            OsUser user = userOptional.get();
             if (user.getAvatarName() != null) {
                 new File(OSFileSpaces.OS_USER_AVATAR, user.getAvatarName()).delete();
             }

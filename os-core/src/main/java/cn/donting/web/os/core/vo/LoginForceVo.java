@@ -1,12 +1,12 @@
 package cn.donting.web.os.core.vo;
 
 import cn.donting.web.os.core.service.UserService;
-import cn.donting.web.os.core.db.entity.User;
+import cn.donting.web.os.core.db.entity.OsUser;
 import lombok.Data;
 
 /**
  * 强制登陆参数
- * @see cn.donting.web.os.core.controller.UserController#login(User)
+ * @see cn.donting.web.os.core.controller.UserController#login(OsUser)
  * @see cn.donting.web.os.core.controller.UserController#loginForce(LoginForceVo)
  * @see UserService#login(String, String)
  * @see UserService#loginForce(String)

@@ -9,6 +9,9 @@ import java.net.URLEncoder;
 
 public class ResourceUtil {
 
+    public static String getWapResourceId(String wapId,String resource){
+        return wapId + "." + resource;
+    }
 
     public static URL getWapResourceURL(Wap wap, String resource) {
         if (resource == null) {

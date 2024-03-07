@@ -1,10 +1,10 @@
 package cn.donting.web.os.core.vo;
 
-import cn.donting.web.os.core.db.entity.WapInfo;
+import cn.donting.web.os.api.wap.WapInfo;
+import cn.donting.web.os.api.wap.WapInstallInfo;
 import cn.donting.web.os.core.wap.Wap;
 import cn.donting.web.os.core.wap.WapStatus;
 import lombok.Data;
-import org.springframework.beans.BeanUtils;
 
 /**
  * @see cn.donting.web.os.core.wap.Wap

@@ -16,11 +16,6 @@ public class OsSetting {
      */
     private String desktopWapId;
     /**
-     *  桌面 wap 忽略的登陆 资源
-     * @see WapWindow#loginIgnoreURL
-     */
-    private List<String> loginIgnoreRURL;
-    /**
      * 文件(夹)选择 的wapId
      */
     private String fileManagerSelectWapId;

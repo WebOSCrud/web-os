@@ -17,6 +17,10 @@ import java.io.File;
  * --- ·*******.jar
  * --- ·icon.png
  * -os
+ * --wap-resources
+ * ----wapId
+ *       ***.png
+ *       ***.png
  * --db
  * --- ·installs.json 安装列表
  * --- ·setting.json 设置
@@ -45,6 +49,7 @@ public class OSFileSpaces {
      */
     public static final File OS_USER_AVATAR = new File(OS, "avatar");
     public static final File OS_DB = new File(OS, "db");
+    public static final File OS_WAP_RESOURCES = new File(OS, "wap-resources");
 
     public static final String USER_DESKTOP_NAME = "desktop";
 
@@ -63,6 +68,9 @@ public class OSFileSpaces {
         }
         if (!OS_DB.exists()) {
             OS_DB.mkdirs();
+        }
+        if (!OS_WAP_RESOURCES.exists()) {
+            OS_WAP_RESOURCES.mkdirs();
         }
         if (!OS_USER_AVATAR.exists()) {
             OS_USER_AVATAR.mkdirs();

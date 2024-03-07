@@ -7,8 +7,7 @@ import lombok.Setter;
 
 /**
  * 窗口参数
- * 打开窗口时的参数
- *
+ * 打开窗口时默认的参数
  * @see WapWindow
  */
 @Getter
@@ -19,104 +18,100 @@ public class WapWindowOption {
      * 不带 wapId
      * spring boot 原始访问路径是啥就是啥。 访问时会自动加 wapId
      * /index.html
-     * 如果是使用打开文件 则会跟上 openFilePath 的参数
-     * static/index.html?openFilePath=D:\abc.tet
-     *
-     * @see WapWindowType#OpenFile
+     * 窗口打开的url
      */
     @NonNull
-    private String url;
-
+    String url;
     /**
      * 标题
+     * 默认 桌面环境定义
      */
-    @NonNull
-    private String title;
+    @Nullable
+    String title;
 
     /**
      * 窗口图标
+     * 默认 桌面环境定义
      */
     @Nullable
-    private String iconResource;
-
+    String iconUrl;
     /**
      * 宽度
+     * 默认 桌面环境定义
      */
     @Nullable
-    private Integer width;
-
+    Integer width;
     /**
      * 高度
+     * 默认 桌面环境定义
      */
     @Nullable
-    private Integer height;
-
+    Integer height;
     /**
-     * X偏移量，默认居中
+     * x 偏移量
+     * 默认居中
      */
     @Nullable
-    private Integer x;
-
+    Integer x;
     /**
-     * Y偏移量，默认居中
+     * y 偏移量
+     * 默认居中
      */
     @Nullable
-    private Integer y;
-
+    Integer y;
     /**
-     * 最小宽度，默认值为0
+     * 最小宽度
+     * 默认值为 0.
      */
     @Nullable
-    private Integer minWidth;
-
+    Integer minWidth;
     /**
-     * 最小高度，默认值为0
+     * 最小高度
+     * 默认值为 0.
      */
     @Nullable
-    private Integer minHeight;
-
+    Integer minHeight;
     /**
-     * 最大宽度，默认值不限
+     * 最大宽度
+     * 默认值不限
      */
     @Nullable
-    private Integer maxWidth;
-
+    Integer maxWidth;
     /**
-     * 最大高度，默认值不限
+     * 最大高度
+     * 默认值不限
      */
     @Nullable
-    private Integer maxHeight;
-
+    Integer maxHeight;
     /**
-     * 窗口大小是否可调整，默认值为true
+     * 窗口大小是否可调整
+     * 默认值为 true
      */
     @Nullable
-    private Boolean resizable = true;
-
+    Boolean resizable;
     /**
-     * 窗口是否可移动，默认值为true
+     * 窗口是否可移动
+     * 默认值为 true
      */
     @Nullable
-
-    private Boolean movable = true;
-
+    Boolean movable;
     /**
-     * 窗口是否可最小化，默认值为true
+     * 窗口是否可最小化
+     * 默认值为 true
      */
     @Nullable
-    private Boolean minimizable = true;
-
+    Boolean minimizable;
     /**
-     * 窗口是否最大化，默认值为true
+     * 窗口是否最大化
+     * 默认值为 true
      */
     @Nullable
-    private Boolean maximizable = true;
-
+    Boolean maximizable;
     /**
      * 窗口主题背景色
-     * 默认桌面设置
+     * 默认 桌面环境定义
      */
     @Nullable
-    private String background;
+    String background;
 
 }

@@ -3,12 +3,9 @@ package cn.donting.web.os.core.service;
 import cn.donting.web.os.api.exception.TaskException;
 import cn.donting.web.os.api.task.Task;
 import cn.donting.web.os.api.task.TaskState;
-import cn.donting.web.os.core.db.entity.User;
-import cn.donting.web.os.core.exception.ResponseException;
+import cn.donting.web.os.core.db.entity.OsUser;
 import cn.donting.web.os.core.loader.WapClassLoader;
 import cn.donting.web.os.api.task.TaskResult;
-import cn.donting.web.os.core.vo.ResponseBody;
-import cn.donting.web.os.core.vo.ResponseBodyCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -37,7 +34,7 @@ public class TaskService implements cn.donting.web.os.api.task.TaskService {
         if (task.getTaskState() != TaskState.Creat) {
             throw new TaskException("task State 不是 TaskState.Creat");
         }
-        User loginUser = userService.getLoginUser();
+        OsUser loginUser = userService.getLoginUser();
         if(loginUser==null){
             throw new TaskException("不是登陆用户操作的");
         }
@@ -62,7 +59,7 @@ public class TaskService implements cn.donting.web.os.api.task.TaskService {
 
     @Override
     public List<Task> taskListCurrentUser() {
-        User loginUser = userService.getLoginUser();
+        OsUser loginUser = userService.getLoginUser();
         List<Task> tasks = taskList();
         tasks.removeIf(task -> !task.getUsername().equals(loginUser.getName()));
         return tasks;

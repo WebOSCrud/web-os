@@ -1,7 +1,7 @@
 package cn.donting.web.os.core.service;
 
-import cn.donting.web.os.core.db.entity.WapInfo;
-import cn.donting.web.os.core.db.repository.IWapInfoRepository;
+import cn.donting.web.os.api.wap.WapInstallInfo;
+import cn.donting.web.os.core.db.repository.IWapInstallInfoRepository;
 import cn.donting.web.os.core.exception.WapLoadException;
 import cn.donting.web.os.core.exception.WapNotFoundException;
 import cn.donting.web.os.core.file.OSFileSpaces;
@@ -47,7 +47,7 @@ public class WapRuntimeService {
     private int wapTimeoutSeconds = 60*15;
 
 
-    final IWapInfoRepository wapInfoRepository;
+    final IWapInstallInfoRepository wapInstallInfoRepository;
     /**
      * wap 运行时集合
      */
@@ -57,8 +57,8 @@ public class WapRuntimeService {
 
     @Value("${spring.profiles.active:#{null}}")
     String active;
-    public WapRuntimeService(IWapInfoRepository wapInfoRepository, @Autowired(required = false) DevOsProperties devOsProperties) {
-        this.wapInfoRepository = wapInfoRepository;
+    public WapRuntimeService(IWapInstallInfoRepository wapInfoRepository, @Autowired(required = false) DevOsProperties devOsProperties) {
+        this.wapInstallInfoRepository = wapInfoRepository;
         this.devOsProperties = devOsProperties;
     }
 
@@ -75,7 +75,7 @@ public class WapRuntimeService {
         if (wap != null) {
             return wap;
         }
-        Optional<WapInfo> wapInfoOp = wapInfoRepository.findById(wapId);
+        Optional<WapInstallInfo> wapInfoOp = wapInstallInfoRepository.findById(wapId);
         if (wapInfoOp.isPresent()) {
             wap = loadAndStartWap(wapInfoOp.get());
             return wap;
@@ -91,11 +91,11 @@ public class WapRuntimeService {
      * @return
      * @throws WapLoadException
      */
-    private synchronized Wap loadAndStartWap(WapInfo wapInfo) throws WapLoadException {
-        if (wapRuntimeMap.containsKey(wapInfo.getId())) {
-            return wapRuntimeMap.get(wapInfo.getId());
+    private synchronized Wap loadAndStartWap(WapInstallInfo wapInstallInfo) throws WapLoadException {
+        if (wapRuntimeMap.containsKey(wapInstallInfo.getWapInfo().getId())) {
+            return wapRuntimeMap.get(wapInstallInfo.getWapInfo().getId());
         }
-        String id = wapInfo.getId();
+        String id = wapInstallInfo.getWapInfo().getId();
         File file = new File(OSFileSpaces.WAP_DATA, id + File.separator + WapService.jarFileName);
         if (!file.exists()) {
             file = new File(OSFileSpaces.WAP_DATA, id + File.separator + WapService.devFileName);
@@ -104,7 +104,7 @@ public class WapRuntimeService {
         try {
             Wap loader = wapLoader.load();
             wapRuntimeMap.put(id, loader);
-            WapServletContext wapServletContext = new WapServletContext(wapInfo.getId());
+            WapServletContext wapServletContext = new WapServletContext(wapInstallInfo.getWapInfo().getId());
             WapServletConfig wapServletConfig = new WapServletConfig(loader, wapServletContext);
             ArrayList<String> args=new ArrayList();
             if (devOsProperties != null) {

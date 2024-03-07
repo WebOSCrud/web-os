@@ -1,8 +1,8 @@
 package cn.donting.web.os.core.wap;
 
-import cn.donting.web.os.core.db.entity.WapInfo;
+import cn.donting.web.os.api.wap.WapInfo;
+import cn.donting.web.os.api.wap.WapInstallInfo;
 import cn.donting.web.os.core.loader.WapClassLoader;
-import cn.donting.web.os.core.servlet.WapServletContext;
 import cn.donting.web.os.launch.wap.WapWebSpringApplicationLifecycle;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,10 +1,8 @@
 package cn.donting.web.os.core.controller;
 
-import cn.donting.web.os.core.OsCoreApplication;
 import cn.donting.web.os.core.api.OsApi;
-import cn.donting.web.os.core.db.entity.User;
+import cn.donting.web.os.core.db.entity.OsUser;
 import cn.donting.web.os.core.service.UserService;
-import cn.donting.web.os.core.vo.LoginForceVo;
 import cn.donting.web.os.core.vo.ResponseBody;
 import cn.donting.web.os.core.vo.ResponseBodyCodeEnum;
 import cn.donting.web.os.core.vo.UserVo;
@@ -69,7 +67,7 @@ public class UserController {
      */
     @GetMapping("/login/user")
     public ResponseBody<UserVo> loginUser() {
-        User loginUser = userService.getLoginUser();
+        OsUser loginUser = userService.getLoginUser();
         return ResponseBody.success(new UserVo(loginUser));
     }
 
@@ -81,7 +79,7 @@ public class UserController {
      */
     @GetMapping("/list")
     public ResponseBody<List<UserVo>> userList() {
-        List<User> users = userService.userList();
+        List<OsUser> users = userService.userList();
         List<UserVo> collect = users.stream().map(UserVo::new).collect(Collectors.toList());
         return ResponseBody.success(collect);
     }
@@ -93,7 +91,7 @@ public class UserController {
      */
     @PostMapping("/info")
     public ResponseBody<UserVo> userInfo(@RequestBody UserInfoPar userInfoPar) throws IOException {
-        User user = userService.modifyUserInfo(userInfoPar);
+        OsUser user = userService.modifyUserInfo(userInfoPar);
         return ResponseBody.success(new UserVo(user));
     }
 
@@ -104,7 +102,7 @@ public class UserController {
      */
     @GetMapping("/avatar")
     public void userAvatar(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
-        User loginUser = userService.getLoginUser();
+        OsUser loginUser = userService.getLoginUser();
         String avatarName = loginUser.getAvatarName();
         httpServletRequest.getRequestDispatcher(USER_AVATAR_PATH + "/" + avatarName)
                 .forward(httpServletRequest, httpServletResponse);

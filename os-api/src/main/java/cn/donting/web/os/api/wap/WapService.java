@@ -13,11 +13,15 @@ public interface WapService {
      * @param file
      * @return WapInfo
      */
-    WapInfo installUpdate(File file) throws Exception;
+    WapInstallInfo installUpdate(File file) throws Exception;
 
+    /**
+     * 重文件获取 WapInfo
+     * @param file
+     * @return
+     * @throws Exception
+     */
     WapInfo getWapInfo(File file) throws Exception;
-
-
 
     /**
      * 根据 wapId卸载一个wap
@@ -31,7 +35,7 @@ public interface WapService {
      * 获取所有已安装的wap列表
      * @return List<WapInfo>
      */
-    List<WapInfo> getInstallList();
+    List<WapInstallInfo> getInstallList();
 
     /**
      * 获取wap 应用数据存储空间 目录，卸载时会一并删除

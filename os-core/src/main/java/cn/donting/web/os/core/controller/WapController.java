@@ -1,6 +1,7 @@
 package cn.donting.web.os.core.controller;
 
-import cn.donting.web.os.core.db.entity.WapInfo;
+import cn.donting.web.os.api.wap.WapInstallInfo;
+import cn.donting.web.os.core.db.repository.IWapInstallInfoRepository;
 import cn.donting.web.os.core.file.OSFileSpaces;
 import cn.donting.web.os.core.loader.WapLoader;
 import cn.donting.web.os.core.service.WapRuntimeService;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
  * 卸载
  *
  * @see WapRuntimeService
- * @see cn.donting.web.os.core.db.repository.IWapInfoRepository
+ * @see IWapInstallInfoRepository
  * @see cn.donting.web.os.core.service.WapService
  */
 @RestController
@@ -50,9 +51,10 @@ public class WapController {
      */
     @GetMapping("/installs")
     public ResponseBody<List<WapInfoVo>> getInstallList() {
-        List<cn.donting.web.os.api.wap.WapInfo> installList = wapService.getInstallList();
-        List<WapInfoVo> collect = installList.stream().map(WapInfoVo::new).collect(Collectors.toList());
-        return ResponseBody.success(collect);
+        List<WapInstallInfo> installList = wapService.getInstallList();
+        //TODO
+//        List<WapInfoVo> collect = installList.stream().map(WapInfoVo::new).collect(Collectors.toList());
+        return ResponseBody.success();
     }
 
     /**

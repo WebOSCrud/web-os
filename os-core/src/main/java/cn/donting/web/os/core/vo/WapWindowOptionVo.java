@@ -22,6 +22,6 @@ public class WapWindowOptionVo extends WapWindowOption {
 
     public WapWindowOptionVo(WapWindowOption wapWindowOption, String wapId) {
         BeanUtils.copyProperties(wapWindowOption, this);
-        iconUrl= ResourceUtil.getWapResourceHttpURL(wapId,wapWindowOption.getIconResource());
+        iconUrl= wapWindowOption.getIconUrl();
     }
 }

@@ -9,8 +9,9 @@ import java.util.List;
 
 /**
  * Wap 安装信息
+ * wap.info.json
  * <p>
- * 如果 {@link WapInfo.FileType} 存在， 则说明 wap 支持对应的 文件打开，
+ * 如果 {@link FileType} 存在， 则说明 wap 支持对应的 文件打开，
  * 则调用Wap 打开文件则访问 {@link WapWindowOption#url}，会携带 openFilePath参数到url上
  * </p>
  *
@@ -69,35 +70,5 @@ public class WapInfo {
     @Nullable
     private List<FileType> fileTypes = new ArrayList<>();
 
-    /**
-     * 版本更新说明
-     */
-    @Nullable
-    private String updateInstructions;
-
-    /**
-     * 文件类型
-     */
-    @Data
-    public static class FileType {
-        /**
-         * 文件图标
-         * 相对于 resources 路径
-         * static/icon.png
-         */
-        @NonNull
-        private String iconResource;
-
-        /**
-         * 文件描述
-         */
-        @NonNull
-        private String description;
-        /**
-         * 文件扩展名
-         */
-        @NonNull
-        private String extName;
-    }
 
 }
