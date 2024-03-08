@@ -70,6 +70,7 @@ public class FileUtil {
         }
         if (file.isFile()) {
             file.delete();
+            return;
         }
         Files.walkFileTree(file.toPath(), new SimpleFileVisitor<Path>() {
             @Override
@@ -84,6 +85,7 @@ public class FileUtil {
                 return FileVisitResult.CONTINUE;
             }
         });
+        file.delete();
     }
 
     /**
@@ -94,10 +96,10 @@ public class FileUtil {
      */
     public static String[] splitNameAndExt(File file) {
         if (!file.exists()) {
-            return new String[]{"", FileType.ext_name_unknown};
+            return new String[]{file.getName(), FileType.ext_name_unknown};
         }
         if (file.isDirectory()) {
-            return new String[]{"", FileType.ext_name_Directory};
+            return new String[]{file.getName(), FileType.ext_name_Directory};
         }
         String fileName = file.getName();
         return splitNameAndExt(fileName);
@@ -136,19 +138,12 @@ public class FileUtil {
     /**
      * 根据文件名获取 图像类型
      * @param name 文件名
-     * @return MediaType 图像类型， 默认 IMAGE_PNG
      */
-    public static MediaType getImageMediaType(String name) {
+    public static String getImageContentType(String name) {
         String[] nameAndExt = splitNameAndExt(name);
         String extName = nameAndExt[1];
-        switch (extName) {
-            case "jpeg":
-                return MediaType.IMAGE_JPEG;
-            case "gif":
-                return MediaType.IMAGE_GIF;
-            default:
-                return MediaType.IMAGE_PNG;
-        }
+        return "image/"+extName;
+
     }
 
     public static void main(String[] args) {

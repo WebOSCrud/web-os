@@ -28,6 +28,15 @@
         "url": "/page/filemanager/index.html",
         "iconUrl": "/img/explorer.png"
       }
+    },
+    {
+      "name": "文件管理器",
+      "type": "OpenFile",
+      "iconResource": "static/img/explorer.png",
+      "option": {
+        "url": "/page/filemanager/index.html",
+        "iconUrl": "/img/explorer.png"
+      }
     }
   ]
 }

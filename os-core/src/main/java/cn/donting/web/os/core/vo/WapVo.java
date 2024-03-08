@@ -27,15 +27,14 @@ public class WapVo {
 
     private WapStatus wapStatus;
 
-    WapInfoVo wapInfo;
+    WapInstallInfo wapInstallInfo;
 
-    public WapVo(Wap wap) {
+    public WapVo(Wap wap,WapInstallInfo wapInstallInfo) {
         httpLastVisitTimme=wap.getHttpLastVisitTimme();
         startTime=wap.getStartTime();
         startUpTime=wap.getStartUpTime();
         wapStatus=wap.getWapStatus();
-        WapInfo wapInfo = wap.getWapInfo();
-        this.wapInfo=new WapInfoVo(wapInfo);
+        this.wapInstallInfo=wapInstallInfo;
         ThreadGroup threadGroup = wap.getWapClassLoader().getThreadGroup();
         activeThread = threadGroup.activeCount();
     }

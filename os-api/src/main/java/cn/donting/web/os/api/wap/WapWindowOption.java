@@ -8,6 +8,7 @@ import lombok.Setter;
 /**
  * 窗口参数
  * 打开窗口时默认的参数
+ * 和 web.os.js.api 中一致
  * @see WapWindow
  */
 @Getter

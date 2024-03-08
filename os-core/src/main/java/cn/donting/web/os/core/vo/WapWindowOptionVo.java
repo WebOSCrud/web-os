@@ -13,15 +13,10 @@ import org.springframework.beans.BeanUtils;
 /**
  * 打开文件 的 窗口参数
  */
-@JsonIgnoreProperties(value = {"iconResource"})
 @Getter
 @Setter
-public class WapWindowOptionVo extends WapWindowOption {
+public class WapWindowOptionVo {
 
-    private String iconUrl;
+    private WapWindowOption wapWindowOption;
 
-    public WapWindowOptionVo(WapWindowOption wapWindowOption, String wapId) {
-        BeanUtils.copyProperties(wapWindowOption, this);
-        iconUrl= wapWindowOption.getIconUrl();
-    }
 }

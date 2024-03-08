@@ -2,6 +2,7 @@ package cn.donting.web.os.core.service;
 
 import cn.donting.web.os.api.wap.*;
 import cn.donting.web.os.core.OsCoreApplication;
+import cn.donting.web.os.core.OsSetting;
 import cn.donting.web.os.core.db.entity.OsFileType;
 import cn.donting.web.os.core.db.entity.WapResource;
 import cn.donting.web.os.core.db.repository.IOsFileTypeRepository;
@@ -21,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,24 +53,27 @@ public class WapService implements cn.donting.web.os.api.wap.WapService {
 
     @Override
     public synchronized WapInstallInfo installUpdate(File file) throws Exception {
+        log.info("install file:{}",file);
         WapLoader wapLoader = WapLoader.getWapLoader(file);
         Wap wap = wapLoader.load();
         checkWap(wap);
+        log.info("install wapId:{}",wap.getWapInfo().getId());
 
         File wapDir = new File(OSFileSpaces.WAP_DATA, wap.getWapInfo().getId());
         wapDir.mkdirs();
         String extName = FileUtil.extName(file);
         //复制 jar 文件
         if (extName.equals(OsCoreApplication.WPA_DEV_EXT_NAME)) {
-            Files.copy(file.toPath(), new File(wapDir, devFileName).toPath());
+            Files.copy(file.toPath(), new File(wapDir, devFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
         } else {
-            Files.copy(file.toPath(), new File(wapDir, jarFileName).toPath());
+            Files.copy(file.toPath(), new File(wapDir, jarFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
         Optional<WapInstallInfo> wapInstallInfoOp = wapInstallInfoRepository.findById(wap.getWapInfo().getId());
         WapInstallInfo newWapInstallInfo;
         //已经安装过，执行更新
         if (wapInstallInfoOp.isPresent()) {
+            log.info("update wap:{}",wap.getWapInfo().getId());
             WapInstallInfo oldWapInstallInfo = wapInstallInfoOp.get();
             newWapInstallInfo = new WapInstallInfo();
             newWapInstallInfo.setWapInfo(wap.getWapInfo());
@@ -77,16 +82,18 @@ public class WapService implements cn.donting.web.os.api.wap.WapService {
             wapInstallInfoRepository.save(newWapInstallInfo);
 
         } else {
+            log.info("first install wap:{}",wap.getWapInfo().getId());
             //首次安装
             newWapInstallInfo = new WapInstallInfo();
             newWapInstallInfo.setWapInfo(wap.getWapInfo());
             newWapInstallInfo.setInstallTime(System.currentTimeMillis());
             newWapInstallInfo.setUpdateTime(0);
             wapInstallInfoRepository.save(newWapInstallInfo);
+
         }
         String wapId = wap.getWapInfo().getId();
         deleteWapResource(wapId);
-        if (new File(OSFileSpaces.OS_WAP_RESOURCES, wapId).mkdirs()) {
+        if (!new File(OSFileSpaces.OS_WAP_RESOURCES, wapId).mkdirs()) {
             throw new WapLoadException(wapId,file,"wapId 出现特殊字符无法创建文件夹");
         }
         deleteOsFileType(wapId);
@@ -111,7 +118,11 @@ public class WapService implements cn.donting.web.os.api.wap.WapService {
         List<String> ids = wapResources.stream().map(WapResource::getId).collect(Collectors.toList());
         wapResourceRepository.deleteAll(ids);
         File file = new File(OSFileSpaces.OS_WAP_RESOURCES, wapId);
-        file.delete();
+        try {
+            FileUtil.deleteFile(file);
+        } catch (IOException e) {
+            log.warn(e.getMessage(),e);
+        }
     }
 
 
@@ -125,6 +136,13 @@ public class WapService implements cn.donting.web.os.api.wap.WapService {
             if (wapResource != null) {
                 newWapResource.add(wapResource);
             }
+            if (wapWindow.getType().equals(WapWindowType.Desktop)) {
+                OsSetting osSetting = osService.getOsSetting();
+                if (osSetting.getDesktopWapId()==null) {
+                    osSetting.setDesktopWapId(wapInfo.getId());
+                    osService.saveOsSetting(osSetting);
+                }
+            }
         }
         wapResourceRepository.saveAll(newWapResource);
     }
@@ -132,13 +150,15 @@ public class WapService implements cn.donting.web.os.api.wap.WapService {
     private void updateWapFileType(Wap wap) throws IOException {
         WapInfo wapInfo = wap.getWapInfo();
         List<WapResource> newWapResource = new ArrayList<>();
+        Set<String> wapResourceId=new HashSet<>();
         List<FileType> fileTypes = wapInfo.getFileTypes();
         List<OsFileType> osFileTypes = new ArrayList<>();
         for (FileType fileType : fileTypes) {
             String iconResource = fileType.getIconResource();
             WapResource wapResource = copyWapResource(iconResource, wap);
-            if (wapResource != null) {
+            if (wapResource != null && !wapResourceId.contains(wapResource.getId())) {
                 newWapResource.add(wapResource);
+                wapResourceId.add(wapResource.getId());
             }
             Optional<OsFileType> osFileTypeOp = osFileTypeRepository.findById(fileType.getExtName());
             if (!osFileTypeOp.isPresent()) {
@@ -146,7 +166,7 @@ public class WapService implements cn.donting.web.os.api.wap.WapService {
                 osFileType.setExtName(fileType.getExtName());
                 osFileType.setDescription(fileType.getDescription());
                 osFileType.setWapId(wapInfo.getId());
-                osFileType.setIconResource(wapInfo.getIconResource());
+                osFileType.setIconResource(fileType.getIconResource());
                 osFileTypes.add(osFileType);
             }
         }
@@ -166,9 +186,14 @@ public class WapService implements cn.donting.web.os.api.wap.WapService {
             return null;
         }
         WapInfo wapInfo = wap.getWapInfo();
+        String wapResourceId = ResourceUtil.getWapResourceId(wapInfo.getId(), resource);
+        log.info("copy wapResourceId:{}",wapResourceId);
+        if (wapResourceRepository.findById(wapResourceId).isPresent()) {
+            return null;
+        }
         WapResource wapResource = new WapResource();
         wapResource.setWapId(wapInfo.getId());
-        wapResource.setId(ResourceUtil.getWapResourceId(wapInfo.getId(), resource));
+        wapResource.setId(wapResourceId);
         wapResource.setFileName(UUID.randomUUID() + "." + FileUtil.extName(resource));
         FileUtil.copyFile(resourceURL, new File(resourcesDir, wapResource.getFileName()));
         return wapResource;

@@ -20,6 +20,7 @@ import java.util.function.Predicate;
 public class WapWebMvcConfigurer implements WebMvcConfigurer {
 
     public static final String USER_AVATAR_PATH = "/" + OsCoreApplication.OS_ID + "/user/avatar";
+    public static final String WAP_RESOURCES_PATH = "/" + OsCoreApplication.OS_ID + "/os/wap-resources";
 
     @Autowired
     WebProperties webProperties;
@@ -33,6 +34,7 @@ public class WapWebMvcConfigurer implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         ///用户头像
         registry.addResourceHandler(USER_AVATAR_PATH + "/**").addResourceLocations("file:" + OSFileSpaces.OS_USER_AVATAR.getPath() + "/");
+        registry.addResourceHandler(WAP_RESOURCES_PATH + "/**").addResourceLocations("file:" + OSFileSpaces.OS_WAP_RESOURCES.getPath() + "/");
         //主程序 修改静态资源
         if (webProperties.getResources().getStaticLocations() != null) {
             String[] staticLocations = webProperties.getResources().getStaticLocations();

@@ -13,17 +13,4 @@ public class FileTypeVo {
     private String wapId;
     private String iconUrl;
 
-    public FileTypeVo(OsFileType fileType) {
-        this.extName = fileType.getExtName();
-        //TODO:
-//        this.wapId = fileType.getWapId();
-        this.description = fileType.getDescription();
-        iconUrl=ResourceUtil.getWapResourceHttpURL(wapId,fileType.getIconResource());
-    }
-    public FileTypeVo(String wapId,cn.donting.web.os.api.wap.FileType fileType) {
-        this.extName = fileType.getExtName();
-        this.wapId = wapId;
-        this.description = fileType.getDescription();
-        iconUrl=ResourceUtil.getWapResourceHttpURL(wapId,fileType.getIconResource());
-    }
 }

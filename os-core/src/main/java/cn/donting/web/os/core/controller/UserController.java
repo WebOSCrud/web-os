@@ -32,21 +32,7 @@ public class UserController {
         this.osApi = osApi;
         this.userService = userService;
     }
-//
-//    /**
-//     * 用户登录
-//     *
-//     * @param user name,password
-//     * @return {@link  ResponseBodyCodeEnum#LOGIN_IS_LOGIN}
-//     * {@link  ResponseBodyCodeEnum#LOGIN_FAIL}
-//     * {@link  ResponseBodyCodeEnum#OK}
-//     * @see
-//     */
-//    @PostMapping("/login")
-//    public ResponseBody<UserVo> login(@RequestBody User user) {
-//        user = osApi.userService().login(user.getName(), user.getPassword());
-//        return ResponseBody.success(new UserVo(user));
-//    }
+
 
 
     /**
