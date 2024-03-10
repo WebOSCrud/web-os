@@ -74,7 +74,14 @@ public class FIleController {
             httpServletResponse.getOutputStream().write(Files.readAllBytes(file.toPath()));
             return;
         }
-        //
+        //可以让前端使用缓存
+        httpServletResponse.sendRedirect("/" + OsCoreApplication.OS_ID + "/file/ext_name/icon?extName=" + extName);
+    }
+
+    @GetMapping("/ext_name/icon")
+    public void fileExtIcon(String extName, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        //文件扩展名
+        extName = extName.toLowerCase();
         if (extName.equals(OsCoreApplication.WPA_EXT_NAME) || extName.equals(OsCoreApplication.WPA_DEV_EXT_NAME)) {
             httpServletRequest.getRequestDispatcher("/" + OsCoreApplication.OS_ID + "/img/wap-file.png").forward(httpServletRequest, httpServletResponse);
         } else {
@@ -114,7 +121,7 @@ public class FIleController {
         String extName = FileUtil.extName(new File(fileOpenPar.getFlePath()));
         String wapId = fileOpenPar.getWapId();
 
-        if(fileOpenPar.getWapId()==null){
+        if (fileOpenPar.getWapId() == null) {
             Optional<OsFileType> osFileTypeOptional = osFileTypeRepository.findById(extName);
             if (osFileTypeOptional.isPresent()) {
                 wapId = osFileTypeOptional.get().getWapId();
@@ -122,7 +129,7 @@ public class FIleController {
             }
         }
         //没有默认打开的 wap
-        if(wapId==null){
+        if (wapId == null) {
             return ResponseBody.fail(ResponseBodyCodeEnum.FILE_OPEN_FAIL);
         }
 
