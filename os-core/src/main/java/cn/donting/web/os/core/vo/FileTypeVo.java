@@ -12,5 +12,6 @@ public class FileTypeVo {
     private String description;
     private String wapId;
     private String iconUrl;
+    private String openWindowIcon;
 
 }

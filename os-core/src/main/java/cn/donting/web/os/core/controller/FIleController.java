@@ -16,21 +16,17 @@ import cn.donting.web.os.core.util.ResourceUtil;
 import cn.donting.web.os.core.vo.*;
 import cn.donting.web.os.core.vo.ResponseBody;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.w3c.dom.ls.LSInput;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -202,17 +198,53 @@ public class FIleController {
     @org.springframework.web.bind.annotation.ResponseBody
     public ResponseBody<List<FileTypeVo>> getFileTypes() {
         List<OsFileType> fileTypes = osFileTypeRepository.findAll();
+        List<WapInstallInfo> wapInstallInfos = wapInstallInfoRepository.findAll();
+        HashMap<String, WapWindow> wapWindowMap = new HashMap<>();
+        for (WapInstallInfo wapInstallInfo : wapInstallInfos) {
+            for (WapWindow wapWindow : wapInstallInfo.getWapInfo().getWapWindows()) {
+                if (wapWindow.getType().equals(WapWindowType.OpenFile)) {
+                    wapWindowMap.put(wapInstallInfo.getWapInfo().getId(), wapWindow);
+                    break;
+                }
+            }
+        }
+
+        AtomicBoolean unknown = new AtomicBoolean(true);
         List<FileTypeVo> collect = fileTypes.stream().map((fileType -> {
             Optional<WapResource> wapResourceOp = wapResourceRepository.findById(ResourceUtil.getWapResourceId(fileType.getWapId(),
                     fileType.getIconResource()));
-
+            if (fileType.getExtName().equalsIgnoreCase(FileType.ext_name_unknown)) {
+                unknown.set(false);
+            }
             FileTypeVo fileTypeVo = new FileTypeVo();
             fileTypeVo.setDescription(fileType.getDescription());
             fileTypeVo.setWapId(fileType.getWapId());
             fileTypeVo.setIconUrl(ResourceUtil.getWapResourceHttpURL(wapResourceOp.orElseGet(null)));
             fileTypeVo.setExtName(fileType.getExtName().toLowerCase());
+
+            WapWindow wapWindow = wapWindowMap.get(fileType.getWapId());
+            if (wapWindow != null) {
+                wapResourceOp = wapResourceRepository.findById(
+                        ResourceUtil.getWapResourceId(
+                                fileType.getWapId(),
+                                wapWindow.getIconResource())
+                );
+                if (wapResourceOp.isPresent()) {
+                    WapResource wapResource = wapResourceOp.get();
+                    fileTypeVo.setOpenWindowIcon(ResourceUtil.getWapResourceHttpURL(wapResource));
+                }
+            }
+
+
             return fileTypeVo;
         })).collect(Collectors.toList());
+        if (unknown.get()) {
+            FileTypeVo fileTypeVo = new FileTypeVo();
+            fileTypeVo.setDescription("未知文件");
+            fileTypeVo.setWapId(OsCoreApplication.OS_ID);
+            fileTypeVo.setIconUrl("/" + OsCoreApplication.OS_ID + "/img/unknown-file.png");
+            fileTypeVo.setExtName(FileType.ext_name_unknown);
+        }
         return ResponseBody.success(collect);
     }
 

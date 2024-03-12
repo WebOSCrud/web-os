@@ -9,7 +9,7 @@ import cn.donting.web.os.core.vo.ResponseBody;
 public class ResponseException extends RuntimeException{
 
     private ResponseBody responseEntity;
-    private int httpStatus=200;
+    private int httpStatus=500;
 
     public ResponseException(ResponseBody responseEntity) {
         super(responseEntity.getCode()+"::"+responseEntity.getMsg());
